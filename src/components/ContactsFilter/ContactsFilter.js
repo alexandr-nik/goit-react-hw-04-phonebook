@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { FilterBlock, FilterTitle, FilterInput } from './ContactsFilter.styled';
-export const ContactsFilter = ({ state: { filter }, filterHandle }) => {
+export const ContactsFilter = ({ filter , filterHandle }) => {
   return (
     <FilterBlock>
       <FilterTitle>Find contacts by name</FilterTitle>

@@ -1,67 +1,55 @@
-import { Component } from 'react';
+import { useEffect } from 'react';
 import { ContactsForm } from './ContactForm';
 import { Contacts } from './Contacts';
 import { AppBlock } from './App.styled';
 import { Section } from './Section';
 import { ContactsFilter } from './ContactsFilter';
+import { useState } from 'react';
 
-export class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
+
+const initialContacts = localStorage.getItem('contacts')
+? JSON.parse(localStorage.getItem('contacts'))
+: [];
+
+export function App() { 
+  const [contacts, setContacts] = useState(initialContacts);
+  const [filter, setFilter] = useState('');
+
+  const filterHandle = e => {
+    const { value } = e.currentTarget;
+    setFilter(value);
   };
-  filterHandle = e => {
-    const { name, value } = e.currentTarget;
-    this.setState({ [name]: value });
+
+  const onClickDelete = (e, id) => {
+    setContacts([...contacts.filter(elem => elem.id !== id)]);
   };
-  onClickDelete = (e, id) => {
-    this.setState(({ contacts }) => ({
-      contacts: contacts.filter(elem => elem.id !== id),
-    }));
+
+  const addContact = newContact => {
+    setContacts(prev => [...prev, newContact]);
   };
-  addContact = newContact => {
-    this.setState(({ contacts }) => ({
-      contacts: [...contacts, newContact],
-    }));
-  };
-  findFilterContact = () => {
-    const { filter, contacts } = this.state;
+  
+  const findFilterContact = () => {
     const filterName = filter.trim().toLowerCase();
     return contacts.filter(elem =>
       elem.name.toLowerCase().includes(filterName)
     );
   };
-  componentDidMount() {
-    const localStorageContact = localStorage.getItem('contacts');
-    if (localStorageContact) {
-      this.setState({ contacts: JSON.parse(localStorageContact) });
-    }
-  }
-  componentDidUpdate(prevPops, prevState) {
-    if (prevState.contacts !== this.state.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
 
-  render() {
-    const {
-      state,
-      filterHandle,
-      addContact,
-      onClickDelete,
-      findFilterContact,
-    } = this;
-    return (
-      <AppBlock>
-        <ContactsForm state={state} addContact={addContact} />
-        <Section title="Contacts">
-          <ContactsFilter state={state} filterHandle={filterHandle} />
-          <Contacts
-            contacts={findFilterContact()}
-            onClickDelete={onClickDelete}
-          />
-        </Section>
-      </AppBlock>
-    );
-  }
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
+
+  return (
+    <AppBlock>
+      <ContactsForm contacts={contacts} addContact={addContact} />
+      <Section title="Contacts">
+        <ContactsFilter filter={filter} filterHandle={filterHandle} />
+        <Contacts
+          contacts={findFilterContact()}
+          onClickDelete={onClickDelete}
+        />
+      </Section>
+    </AppBlock>
+  );
 }
+
